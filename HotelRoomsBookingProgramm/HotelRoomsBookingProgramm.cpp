@@ -2,6 +2,16 @@
 #include <iostream>
 #include <string>
 
+unsigned short int generateNumberOfRooms(unsigned short int minNumberOfRooms,
+    unsigned short int maxNumberOfRooms) {
+    return rand() % (maxNumberOfRooms - minNumberOfRooms) + minNumberOfRooms;
+}
+
+unsigned short int generatePricePerNight(unsigned short int minPrice,
+    unsigned short int maxPrice) {
+    return rand() % (maxPrice - minPrice) + minPrice;
+}
+
 int generateRoom() {
     return rand() % 2;
 }
@@ -65,26 +75,35 @@ int main()
 {
     using namespace std;
 
-    const unsigned int numberOfRooms = 10;
+    const unsigned int minNumberOfRooms = 30;
+    const unsigned int maxNumberOfRooms = 70;
+
+    const unsigned int minPriceOfTheRoom = 80;
+    const unsigned int maxPriceOfTheRoom = 100;
+
+    unsigned short int currentNumberOfRooms;
+    unsigned short int currentPriceOfTheRoom;
 
     //0 - free 1 - booked
-    unsigned short int rooms[numberOfRooms];
+    unsigned short int rooms[maxNumberOfRooms];
 
     unsigned int totalBill = 0;
 
     string userInput;
 
-    generateRandomBookedRooms(rooms, numberOfRooms);
+    currentNumberOfRooms = generateNumberOfRooms(minNumberOfRooms, maxNumberOfRooms);
+    currentPriceOfTheRoom = generatePricePerNight(minPriceOfTheRoom, maxPriceOfTheRoom);
+    generateRandomBookedRooms(rooms, currentNumberOfRooms);
 
     cout << "Welcome to hotel booking programm!" << endl;
-    cout << "Price of a room is 100e per night" << endl;
-    cout << "Currently we have " << numberOfRooms << " rooms" << endl;
+    cout << "Price of a room is "<< currentPriceOfTheRoom <<"e per night" << endl;
+    cout << "Currently we have " << currentNumberOfRooms << " rooms" << endl;
 
     cout << "Write a number of a room you want to book: ";
 
     while (true) {
 
-        userInput = getUserInput(numberOfRooms);
+        userInput = getUserInput(currentNumberOfRooms);
 
         if (getInputAsInt(userInput) == 0)
             break;
@@ -92,7 +111,7 @@ int main()
         if((isRoomAwailable(getInputAsInt(userInput), rooms))) {
             cout << "Room is awailable!" << endl;
             cout << "For how many nights you want to book it? " << endl;
-            userInput = getUserInput(numberOfRooms);
+            userInput = getUserInput(currentNumberOfRooms);
 
             rooms[getInputAsInt(userInput)] = 1;
 
