@@ -238,9 +238,10 @@ int main()
                 userInput = getUserInput();
 
                 auto num = find(reservationNumbers.begin(), reservationNumbers.end(), getInputAsInt(userInput));
+                int index = distance(reservationNumbers.begin(), num);
 
                 if (num != reservationNumbers.end()) {
-                    cout << "Reservation was found " << num[0];
+                    cout << "Reservation was found " << reservationNames[index];
                 }
                 else {
                     cout << "Can't find reservation number, please enter another number " << endl;
