@@ -241,7 +241,13 @@ int main()
                 int index = distance(reservationNumbers.begin(), num);
 
                 if (num != reservationNumbers.end()) {
-                    cout << "Reservation was found " << reservationNames[index];
+                    cout << "Reservation was found! " << endl;
+                    cout << "Name: " << reservationNames[index] << endl;
+                    cout << "Booked rooms: ";
+                    for (int room : bookedRooms[index]) {
+                        cout << room << " ";
+                    }
+                    cout << endl;
                 }
                 else {
                     cout << "Can't find reservation number, please enter another number " << endl;
