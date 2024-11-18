@@ -115,6 +115,11 @@ std::string getUserInput(unsigned short int numberOfRooms) {
     return userInput;
 }
 
+void getEntireStringAsUserInput(std::string& input) {
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::getline(std::cin, input); 
+}
 float getDiscount() {
     srand(time(NULL));
     unsigned short int randResult = rand() % 4;
@@ -137,6 +142,105 @@ int getReservationNumber() {
     return rand() % 90000 + 10000;
 }
 
+void bookTheRoom(std::vector<int> currentUserBookedRooms,
+    unsigned short int currentNumberOfRooms, unsigned short int rooms[], 
+    float currentDiscount, int& totalBill) {
+    using namespace std;
+
+    string userInput;
+    int userInputAsNumber;
+
+    currentUserBookedRooms.push_back(userInputAsNumber);
+    unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, userInputAsNumber);
+
+    cout << "Room is awailable!" << endl;
+    cout << "For how many nights you want to book it? " << endl;
+    userInput = getUserInput(currentNumberOfRooms);
+    userInputAsNumber = getInputAsInt(userInput);
+
+    rooms[userInputAsNumber] = 1;
+
+    totalBill += userInputAsNumber * pricePerNight;
+
+    cout << "Total amount of the bill is: " << totalBill << "e" << endl;
+    cout << "Total discount is: " << currentDiscount << "e" << endl;
+    cout << "Total price with a dicount: " << totalBill - totalBill * currentDiscount << "e" << endl;
+
+    cout << "Write 0 to finish reservation or number of another room, that you want to book ";
+}
+
+void finishReservation(std::vector<std::string> reservationNames, 
+    std::vector<int> reservationNumbers, std::vector<int> currentUserBookedRooms,
+    std::vector<std::vector<int>> bookedRooms) {
+    using namespace std;
+
+    cout << "For finishing reservation please write your name: " << endl;
+
+    string input;
+    int reservaitonNumber;
+
+    getEntireStringAsUserInput(input);
+
+    reservaitonNumber = getReservationNumber();
+
+    reservationNames.push_back(input);
+    reservationNumbers.push_back(reservaitonNumber);
+
+    cout << "Thank you for your reservation, " << input << endl;
+    cout << "Your reservation number is: " << reservaitonNumber << endl;
+
+    bookedRooms.push_back(currentUserBookedRooms);
+}
+
+void processReservationLogic(unsigned short int currentNumberOfRooms, 
+    std::vector<std::string> reservationNames, std::vector<int> reservationNumbers,
+    std::vector<std::vector<int>> bookedRooms, unsigned short int rooms[]) {
+    using namespace std;
+
+    string userInput;
+    int totalBill = 0;
+    float currentDiscount;
+
+    vector<int> currentUserBookedRooms;
+
+    currentDiscount = getDiscount();
+
+    cout << "Write a number of a room you want to book: ";
+
+
+    while (true) {
+
+        userInput = getUserInput(currentNumberOfRooms);
+        int userInputAsNumber = getInputAsInt(userInput);
+
+        if (userInputAsNumber == 0) {
+            finishReservation(
+                reservationNames, 
+                reservationNumbers, 
+                currentUserBookedRooms, 
+                bookedRooms
+            );
+            break;
+        }
+
+        if ((isRoomAwailable(userInputAsNumber, rooms))) {
+            bookTheRoom(
+                currentUserBookedRooms,
+                currentNumberOfRooms,
+                rooms,
+                currentDiscount,
+                totalBill
+            );
+        }
+        else {
+            cout << "Unfortunately room is unawailable, please choose another number " << endl;
+            cout << "Write another number of a room you want to book: ";
+        }
+    }
+
+    cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
+}
+
 int main()
 {
     using namespace std;
@@ -148,7 +252,6 @@ int main()
     const unsigned int doubleRoomPrice = 150;
 
     unsigned short int currentNumberOfRooms;
-    float currentDiscount;
 
     //0 - free 1 - booked
     unsigned short int rooms[maxNumberOfRooms];
@@ -157,12 +260,9 @@ int main()
     vector<string> reservationNames;
     vector<vector<int>> bookedRooms;
 
-    unsigned int totalBill = 0;
-
     string userInput;
 
     currentNumberOfRooms = generateNumberOfRooms(minNumberOfRooms, maxNumberOfRooms);
-    currentDiscount = getDiscount();
 
     generateRandomBookedRooms(rooms, currentNumberOfRooms);
 
@@ -174,61 +274,12 @@ int main()
 
         //This part is responsible for booking rooms
         if (userInput == "1") {
-            cout << "Write a number of a room you want to book: ";
-
-            vector<int> currentUserBookedRooms;
-
-            while (true) {
-
-                userInput = getUserInput(currentNumberOfRooms);
-
-                if (getInputAsInt(userInput) == 0) {
-                    cout << "For finishing reservation please write your name: " << endl;
-
-                    string input;
-                    int reservaitonNumber;
-
-                    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-                    getline(cin, input);
-
-                    reservaitonNumber = getReservationNumber();
-
-                    reservationNames.push_back(input);
-                    reservationNumbers.push_back(reservaitonNumber);
-
-                    cout << "Thank you for your reservation, " << input << endl;
-                    cout << "Your reservation number is: " << reservaitonNumber << endl;
-
-                    bookedRooms.push_back(currentUserBookedRooms);
-                    break;
-                }
-
-                if ((isRoomAwailable(getInputAsInt(userInput), rooms))) {
-                    currentUserBookedRooms.push_back(getInputAsInt(userInput));
-                    unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, getInputAsInt(userInput));
-
-                    cout << "Room is awailable!" << endl;
-                    cout << "For how many nights you want to book it? " << endl;
-                    userInput = getUserInput(currentNumberOfRooms);
-
-                    rooms[getInputAsInt(userInput)] = 1;
-
-                    totalBill += getInputAsInt(userInput) * pricePerNight;
-
-                    cout << "Total amount of the bill is: " << totalBill << "e" << endl;
-                    cout << "Total discount is: " << currentDiscount << "e" << endl;
-                    cout << "Total price with a dicount: " << totalBill - totalBill * currentDiscount << "e" << endl;
-
-                    cout << "Write 0 to finish reservation or number of another room, that you want to book ";
-                }
-                else {
-                    cout << "Unfortunately room is unawailable, please choose another number " << endl;
-                    cout << "Write another number of a room you want to book: ";
-                }
-            }
-
-            cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
+            processReservationLogic(
+                currentNumberOfRooms,
+                reservationNames,
+                reservationNumbers,
+                bookedRooms,
+                rooms);
         }
         //This part is responsible for cheking reservations
         else if (userInput == "2") {
