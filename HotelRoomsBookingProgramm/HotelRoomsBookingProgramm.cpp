@@ -192,9 +192,9 @@ void finishReservation(std::vector<std::string> reservationNames,
     bookedRooms.push_back(currentUserBookedRooms);
 }
 
-void processReservationLogic(unsigned short int currentNumberOfRooms, 
+void processReservation(unsigned short int currentNumberOfRooms, 
     std::vector<std::string> reservationNames, std::vector<int> reservationNumbers,
-    std::vector<std::vector<int>> bookedRooms, unsigned short int rooms[]) {
+    std::vector<std::vector<int>>& bookedRooms, unsigned short int rooms[]) {
     using namespace std;
 
     string userInput;
@@ -241,6 +241,38 @@ void processReservationLogic(unsigned short int currentNumberOfRooms,
     cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
 }
 
+void checkReservation(std::vector<std::vector<int>> bookedRooms, 
+    std::vector<std::string> reservationNames, std::vector<int> reservationNumbers) {
+    using namespace std;
+    cout << "Please enter your reservation number: ";
+
+    while (true) {
+        string userInput = getUserInput();
+        int userInputAsNumber = getInputAsInt(userInput);
+
+        auto num = find(reservationNumbers.begin(), reservationNumbers.end(), getInputAsInt(userInput));
+        int index = distance(reservationNumbers.begin(), num);
+
+        if (num != reservationNumbers.end()) {
+            cout << "Reservation was found! " << endl;
+            cout << "Name: " << reservationNames[index] << endl;
+            cout << "Booked rooms: ";
+            for (int room : bookedRooms[index]) {
+                cout << room << " ";
+            }
+            cout << endl;
+        }
+        else if (userInputAsNumber == 0) {
+            break;
+        }
+        else {
+            cout << "Can't find reservation number, please enter another number " << endl;
+        } 
+    }
+
+    cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
+}
+
 int main()
 {
     using namespace std;
@@ -272,46 +304,30 @@ int main()
 
         userInput = getUserInput();
 
-        //This part is responsible for booking rooms
-        if (userInput == "1") {
-            processReservationLogic(
-                currentNumberOfRooms,
-                reservationNames,
-                reservationNumbers,
-                bookedRooms,
-                rooms);
-        }
-        //This part is responsible for cheking reservations
-        else if (userInput == "2") {
-            cout << "Please enter your reservation number: ";
+        switch (getInputAsInt(userInput)) {
+            
+            //This part is responsible for booking rooms
+            case 1:
+                processReservation(
+                    currentNumberOfRooms,
+                    reservationNames,
+                    reservationNumbers,
+                    bookedRooms,
+                    rooms);
+                break;
 
-            while (true) {
-                userInput = getUserInput();
+            //This part is responsible for cheking reservations
+            case 2:
+                checkReservation(
+                    bookedRooms,
+                    reservationNames,
+                    reservationNumbers
+                );
+                break;
 
-                auto num = find(reservationNumbers.begin(), reservationNumbers.end(), getInputAsInt(userInput));
-                int index = distance(reservationNumbers.begin(), num);
-
-                if (num != reservationNumbers.end()) {
-                    cout << "Reservation was found! " << endl;
-                    cout << "Name: " << reservationNames[index] << endl;
-                    cout << "Booked rooms: ";
-                    for (int room : bookedRooms[index]) {
-                        cout << room << " ";
-                    }
-                    cout << endl;
-                }
-                else {
-                    cout << "Can't find reservation number, please enter another number " << endl;
-                }
-            }
-
-            cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
-        }
-        else if (userInput == "0") {
-            break;
-        }
-        else {
-            cout << "Please enter 1, 2 or 0" << endl;
+            //Tell all awailable inputs to user
+            default:
+                cout << "Please enter 1, 2 or 0" << endl;
         }
     }
 }
