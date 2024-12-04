@@ -142,21 +142,21 @@ int getReservationNumber() {
     return rand() % 90000 + 10000;
 }
 
-void bookTheRoom(std::vector<int> currentUserBookedRooms,
-    unsigned short int currentNumberOfRooms, unsigned short int rooms[], 
+void bookTheRoom(std::vector<int>& currentUserBookedRooms,
+    unsigned short int currentNumberOfRooms, unsigned short int rooms[],
     float currentDiscount, int& totalBill) {
     using namespace std;
 
     string userInput;
     int userInputAsNumber;
 
-    currentUserBookedRooms.push_back(userInputAsNumber);
-    unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, userInputAsNumber);
-
     cout << "Room is awailable!" << endl;
     cout << "For how many nights you want to book it? " << endl;
     userInput = getUserInput(currentNumberOfRooms);
     userInputAsNumber = getInputAsInt(userInput);
+
+    currentUserBookedRooms.push_back(userInputAsNumber);
+    unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, userInputAsNumber);
 
     rooms[userInputAsNumber] = 1;
 
@@ -169,9 +169,9 @@ void bookTheRoom(std::vector<int> currentUserBookedRooms,
     cout << "Write 0 to finish reservation or number of another room, that you want to book ";
 }
 
-void finishReservation(std::vector<std::string> reservationNames, 
-    std::vector<int> reservationNumbers, std::vector<int> currentUserBookedRooms,
-    std::vector<std::vector<int>> bookedRooms) {
+void finishReservation(std::vector<std::string>& reservationNames, 
+    std::vector<int>& reservationNumbers, std::vector<int> currentUserBookedRooms,
+    std::vector<std::vector<int>>& bookedRooms) {
     using namespace std;
 
     cout << "For finishing reservation please write your name: " << endl;
@@ -193,7 +193,7 @@ void finishReservation(std::vector<std::string> reservationNames,
 }
 
 void processReservation(unsigned short int currentNumberOfRooms, 
-    std::vector<std::string> reservationNames, std::vector<int> reservationNumbers,
+    std::vector<std::string>& reservationNames, std::vector<int>& reservationNumbers,
     std::vector<std::vector<int>>& bookedRooms, unsigned short int rooms[]) {
     using namespace std;
 
@@ -205,8 +205,7 @@ void processReservation(unsigned short int currentNumberOfRooms,
 
     currentDiscount = getDiscount();
 
-    cout << "Write a number of a room you want to book: ";
-
+    cout << "Write a number of a room you want to book: " << endl;
 
     while (true) {
 
@@ -303,6 +302,10 @@ int main()
     while (true) {
 
         userInput = getUserInput();
+
+        //Exit from programm
+        if (userInput == "0")
+            break;
 
         switch (getInputAsInt(userInput)) {
             
