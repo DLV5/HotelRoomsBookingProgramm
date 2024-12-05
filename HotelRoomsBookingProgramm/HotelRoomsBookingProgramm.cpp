@@ -33,16 +33,16 @@ int generateRoom() {
     return rand() % 2;
 }
 
-void generateRandomBookedRooms(unsigned short int rooms[],
+void generateRandomBookedRooms(std::vector<int>& rooms,
     unsigned short int numberOfRooms) {
     for (int i = 0; i < numberOfRooms; i++)
     {
-        rooms[i] = generateRoom();
+        rooms.push_back(generateRoom());
     }
 }
 
 bool isRoomAwailable(unsigned short int roomNumber,
-    unsigned short int room[]) {
+    std::vector<int> room) {
     return room[roomNumber] == 0;
 }
 
@@ -99,7 +99,9 @@ std::string getUserInput(unsigned short int numberOfRooms) {
 
     return userInput;
 
-}std::string getUserInput() {
+}
+
+std::string getUserInput() {
     std::string userInput;
 
     std::cin >> userInput;
@@ -120,6 +122,7 @@ void getEntireStringAsUserInput(std::string& input) {
 
     std::getline(std::cin, input); 
 }
+
 float getDiscount() {
     srand(time(NULL));
     unsigned short int randResult = rand() % 4;
@@ -133,6 +136,7 @@ float getDiscount() {
         case 3:
             return 0.2;
         default:
+            return 0;
             break;
     }
 }
@@ -143,8 +147,8 @@ int getReservationNumber() {
 }
 
 void bookTheRoom(std::vector<int>& currentUserBookedRooms,
-    unsigned short int currentNumberOfRooms, unsigned short int rooms[],
-    float currentDiscount, int& totalBill) {
+    unsigned short int currentNumberOfRooms, std::vector<int>& rooms,
+    float currentDiscount, int& totalBill, int roomToBook) {
     using namespace std;
 
     string userInput;
@@ -155,7 +159,7 @@ void bookTheRoom(std::vector<int>& currentUserBookedRooms,
     userInput = getUserInput(currentNumberOfRooms);
     userInputAsNumber = getInputAsInt(userInput);
 
-    currentUserBookedRooms.push_back(userInputAsNumber);
+    currentUserBookedRooms.push_back(roomToBook);
     unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, userInputAsNumber);
 
     rooms[userInputAsNumber] = 1;
@@ -194,7 +198,7 @@ void finishReservation(std::vector<std::string>& reservationNames,
 
 void processReservation(unsigned short int currentNumberOfRooms, 
     std::vector<std::string>& reservationNames, std::vector<int>& reservationNumbers,
-    std::vector<std::vector<int>>& bookedRooms, unsigned short int rooms[]) {
+    std::vector<std::vector<int>>& bookedRooms, std::vector<int> rooms) {
     using namespace std;
 
     string userInput;
@@ -228,7 +232,8 @@ void processReservation(unsigned short int currentNumberOfRooms,
                 currentNumberOfRooms,
                 rooms,
                 currentDiscount,
-                totalBill
+                totalBill,
+                userInputAsNumber
             );
         }
         else {
@@ -285,7 +290,7 @@ int main()
     unsigned short int currentNumberOfRooms;
 
     //0 - free 1 - booked
-    unsigned short int rooms[maxNumberOfRooms];
+    vector<int> rooms;
 
     vector<int> reservationNumbers;
     vector<string> reservationNames;
