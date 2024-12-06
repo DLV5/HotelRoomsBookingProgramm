@@ -20,6 +20,7 @@ void greetTheUser(unsigned short int currentNumberOfRooms) {
     cout << "Welcome to hotel booking programm!" << endl;
     cout << "Price of a single room is " << singleRoomPrice << "e per night" << endl;
     cout << "Price of a double room is " << doubleRoomPrice << "e per night" << endl;
+    cout << "First half of a rooms in out hotels are single rooms, second half are double rooms" << endl;
     cout << "Currently we have " << currentNumberOfRooms << " rooms" << endl;
     cout << "-------------------------------------------" << endl;
     cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
@@ -128,7 +129,9 @@ std::string getUserInput() {
     return userInput;
 }
 
-std::string getEntireStringAsUserInput(std::string input) {
+std::string getEntireStringAsUserInput() {
+    std::string input;
+
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::getline(std::cin, input); 
@@ -196,7 +199,7 @@ void finishReservation(std::vector<reservation>& reservations, std::vector<int> 
     reservation userReservation;
 
     reservaitonNumber = getReservationNumber();
-    reservationName = getEntireStringAsUserInput(reservationName);
+    reservationName = getEntireStringAsUserInput();
 
     userReservation.id = reservaitonNumber;
     userReservation.name = reservationName;
@@ -254,42 +257,98 @@ void processReservation(unsigned short int currentNumberOfRooms,
     cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
 }
 
+void showReservation(reservation reservationToShow)
+{
+    using namespace std;
+
+    cout << "Reservation was found! " << endl;
+    cout << "Name: " << reservationToShow.name << endl;
+    cout << "Booked room(s): ";
+    for (int room : reservationToShow.bookedRoomNumbers)
+    {
+        cout << room << " ";
+    }
+    cout << endl;
+    cout << endl;
+}
+
 void checkReservation(std::vector<reservation> reservations) {
     using namespace std;
 
-    bool wasReservationRound = false;
+    bool wasReservationRound;
+    bool isSearchByNumberEnabled;
+    bool isSearchByNameEnabled;
 
-    cout << "Please enter your reservation number: ";
+    cout << "Enter 1 if you want to search reservation by number" << endl;
+    cout << "Enter 2 if you want to search by name (case sentesive)" << endl;
+    cout << "Enter 0 to exit from this section" << endl;
+
+    string userInput = getUserInput();
 
     while (true) {
-        string userInput = getUserInput();
-        int userInputAsNumber = getInputAsInt(userInput);
+
+        isSearchByNumberEnabled = false;
+        isSearchByNameEnabled = false;
+        wasReservationRound = false;
+
+        switch (getInputAsInt(userInput))
+        {
+            case 1:
+                isSearchByNumberEnabled = true;
+                break;
+            case 2:
+                isSearchByNameEnabled = true;
+                break;
+            default:
+                isSearchByNumberEnabled = true;
+                break;
+        }
+
+        if (isSearchByNumberEnabled)
+        {
+            cout << "Please enter reservation number " << endl;
+            cout << "Enter 0 for exit: " << endl;
+            userInput = getUserInput();
+        }
+
+        if (isSearchByNameEnabled)
+        {
+            cout << "Please enter reservation name: " << endl;
+            cout << "Enter 0 for exit: " << endl;
+            userInput = getEntireStringAsUserInput();
+        }
 
         for (reservation userReservation : reservations)
         {
-            if (userReservation.id = getInputAsInt(userInput))
+            if (isSearchByNumberEnabled)
             {
-                cout << "Reservation was found! " << endl;
-                cout << "Name: " << userReservation.name << endl;
-                cout << "Booked room(s): ";
-                for (int room : userReservation.bookedRoomNumbers)
+                if (userReservation.id == getInputAsInt(userInput))
                 {
-                    cout << room << " ";
-                }
-                cout << endl;
+                    showReservation(userReservation);
 
-                wasReservationRound = true;
+                    wasReservationRound = true;
+                }
+            }
+
+            if (isSearchByNameEnabled)
+            {
+                if (userReservation.name == userInput)
+                {
+                    showReservation(userReservation);
+
+                    wasReservationRound = true;
+                }
             }
         }
 
         if (!wasReservationRound)
         {
-            cout << "Can't find reservation number, please enter another number " << endl;
-
-            if (userInputAsNumber == 0)
+            if (getInputAsInt(userInput) == 0)
             {
                 break;
             }
+
+            cout << "Can't find reservation number or name, please enter another one" << endl;
         }
     }
 
