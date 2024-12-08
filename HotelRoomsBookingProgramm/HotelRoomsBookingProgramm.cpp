@@ -3,12 +3,15 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
+
+using namespace std;
 
 struct reservation
 {
     int id;
-    std::string name;
-    std::vector<int> bookedRoomNumbers;
+    string name;
+    vector<int> bookedRoomNumbers;
 };
 
 const unsigned int minNumberOfRooms = 40;
@@ -17,24 +20,24 @@ const unsigned int maxNumberOfRooms = 300;
 const unsigned int singleRoomPrice = 100;
 const unsigned int doubleRoomPrice = 150;
 
-void checkIsReservationsEmpty(fstream &bookingList)
+const string namesForRandomBooking[] = { "Josh", "Mike", "Stuart", "Ben", "Lisa", "Bella"};
+
+void tryToCreateFolder(filesystem::path folderpath)
 {
-    string bookingString;
+    if (!std::filesystem::exists(folderpath))
+        filesystem::create_directory(folderpath);
+}
 
-    getline(bookingList, bookingString);
+unsigned short int generateNumberOfRooms() {
+    srand(time(NULL));
+    return rand() % (maxNumberOfRooms - minNumberOfRooms) + minNumberOfRooms;
+}
 
-    if (bookingString != "")
-    {
-        //start processing file
-    }
-    else
-    {
-        //Fill file with random bookings
-    }
+int generateRoom() {
+    return rand() % 2;
 }
 
 void greetTheUser(unsigned short int currentNumberOfRooms) {
-    using namespace std;
     cout << "Welcome to hotel booking programm!" << endl;
     cout << "Price of a single room is " << singleRoomPrice << "e per night" << endl;
     cout << "Price of a double room is " << doubleRoomPrice << "e per night" << endl;
@@ -44,11 +47,6 @@ void greetTheUser(unsigned short int currentNumberOfRooms) {
     cout << "Enter 1 to book a room" << endl;
     cout << "Enter 2 to check your reservation" << endl;
     cout << "Enter 0 to exit " << endl;
-}
-
-unsigned short int generateNumberOfRooms() {
-    srand(time(NULL));
-    return rand() % (maxNumberOfRooms - minNumberOfRooms) + minNumberOfRooms;
 }
 
 unsigned short int getPricePerNight(unsigned short int currentNumberOfRooms,
@@ -61,24 +59,88 @@ unsigned short int getPricePerNight(unsigned short int currentNumberOfRooms,
     }
 }
 
-int generateRoom() {
-    return rand() % 2;
+int getReservationNumber()
+{
+    return rand() % 90000 + 10000;
 }
 
-void generateRandomBookedRooms(std::vector<int>& rooms,
-    unsigned short int numberOfRooms) {
+void generateRandomBookedRooms(vector<int>& rooms,
+    unsigned short int numberOfRooms, ofstream &bookingFile) {
+    int isRoomBooked;
+    string reservatorName;
+
+    srand(time(NULL));
+
     for (int i = 0; i < numberOfRooms; i++)
     {
-        rooms.push_back(generateRoom());
+        isRoomBooked = generateRoom();
+
+        if (isRoomBooked == 1)
+        {
+            int randomNamesArraySize = sizeof(namesForRandomBooking) / sizeof(namesForRandomBooking[0]);
+            reservatorName = namesForRandomBooking[rand() % randomNamesArraySize];
+            bookingFile << isRoomBooked << " " << getReservationNumber() << " - " << reservatorName << "\n";
+        }
+        else
+        {
+            bookingFile << isRoomBooked << "\n";
+        }
+        rooms.push_back(isRoomBooked);
     }
 }
 
+vector<reservation> readInputFile(ifstream& bookingFile, vector<int>& rooms)
+{
+    int counter = 0;
+    string booking;
+    bool isBookingNameUnique = true;
+
+    vector<reservation> userBookings;
+
+    while (!bookingFile.eof())
+    {
+        getline(bookingFile, booking);
+        counter++;
+
+        if (booking[0] == '1')
+        {
+            isBookingNameUnique = true;
+            reservation userBooking;
+
+            for (reservation &uBooking : userBookings)
+            {
+                //10 - length of string before name in a file, ex. "0 12345 - Anny Lo" -> "0 12345 - " this is 10 symbols length
+                if ((booking.substr(10) == uBooking.name) && (stoi(booking.substr(2, 10)) == uBooking.id))
+                {
+                    isBookingNameUnique = false;
+                    
+                    uBooking.bookedRoomNumbers.push_back(counter);
+                }
+            }
+
+            if (isBookingNameUnique)
+            {
+                userBooking.id = stoi(booking.substr(2, 10));
+                userBooking.name = booking.substr(10);
+                userBooking.bookedRoomNumbers.clear();
+                userBooking.bookedRoomNumbers.push_back(counter);
+
+                userBookings.push_back(userBooking);
+            }
+            
+            rooms.push_back(counter);
+        }
+    }
+
+    return userBookings;
+}
+
 bool isRoomAwailable(unsigned short int roomNumber,
-    std::vector<int> room) {
+    vector<int> room) {
     return room[roomNumber] == 0;
 }
 
-int getInputAsInt(std::string& userInput) {
+int getInputAsInt(string& userInput) {
     unsigned short int userInputNumber = 0;
 
     for (char letter : userInput) {
@@ -87,11 +149,11 @@ int getInputAsInt(std::string& userInput) {
     return userInputNumber;
 }
 
-bool checkIsInputNumber(std::string& userInput, short int numberOfRooms) {
+bool checkIsInputNumber(string& userInput, short int numberOfRooms) {
     unsigned short int length = 0;
     
     for (char symbol : userInput) {
-        if (!std::isdigit(symbol))
+        if (!isdigit(symbol))
             return false;
 
         length++;
@@ -103,11 +165,11 @@ bool checkIsInputNumber(std::string& userInput, short int numberOfRooms) {
     return true;
 }
 
-bool checkIsInputNumber(std::string& userInput) {
+bool checkIsInputNumber(string& userInput) {
     unsigned short int length = 0;
 
     for (char symbol : userInput) {
-        if (!std::isdigit(symbol))
+        if (!isdigit(symbol))
             return false;
 
         length++;
@@ -116,16 +178,16 @@ bool checkIsInputNumber(std::string& userInput) {
     return true;
 }
 
-std::string getUserInput(unsigned short int numberOfRooms) {
-    std::string userInput;
+string getUserInput(unsigned short int numberOfRooms) {
+    string userInput;
 
-    std::cin >> userInput;
+    cin >> userInput;
 
     if (!checkIsInputNumber(userInput, numberOfRooms))
     {
         do {
-            std::cout << "Your input is wrong, please write another number: ";
-            std::cin >> userInput;
+            cout << "Your input is wrong, please write another number: ";
+            cin >> userInput;
         } while (!checkIsInputNumber(userInput, numberOfRooms));
     }
 
@@ -133,28 +195,28 @@ std::string getUserInput(unsigned short int numberOfRooms) {
 
 }
 
-std::string getUserInput() {
-    std::string userInput;
+string getUserInput() {
+    string userInput;
 
-    std::cin >> userInput;
+    cin >> userInput;
 
     if (!checkIsInputNumber(userInput))
     {
         do {
-            std::cout << "Your input is wrong, please write another number: ";
-            std::cin >> userInput;
+            cout << "Your input is wrong, please write another number: ";
+            cin >> userInput;
         } while (!checkIsInputNumber(userInput));
     }
 
     return userInput;
 }
 
-std::string getEntireStringAsUserInput() {
-    std::string input;
+string getEntireStringAsUserInput() {
+    string input;
 
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    std::getline(std::cin, input); 
+    getline(cin, input); 
 
     return input;
 }
@@ -177,15 +239,9 @@ float getDiscount() {
     }
 }
 
-int getReservationNumber() {
-    srand(time(NULL));
-    return rand() % 90000 + 10000;
-}
-
-void bookTheRoom(std::vector<int>& currentUserBookedRooms,
-    unsigned short int currentNumberOfRooms, std::vector<int>& rooms,
+void bookTheRoom(vector<int>& currentUserBookedRooms,
+    unsigned short int currentNumberOfRooms, vector<int>& rooms,
     float currentDiscount, int& totalBill, int roomToBook) {
-    using namespace std;
 
     string userInput;
     int userInputAsNumber;
@@ -209,8 +265,7 @@ void bookTheRoom(std::vector<int>& currentUserBookedRooms,
     cout << "Write 0 to finish reservation or number of another room, that you want to book ";
 }
 
-void finishReservation(std::vector<reservation>& reservations, std::vector<int> currentUserBookedRooms) {
-    using namespace std;
+void finishReservation(vector<reservation>& reservations, vector<int> currentUserBookedRooms) {
 
     cout << "For finishing reservation please write your name: " << endl;
 
@@ -232,8 +287,7 @@ void finishReservation(std::vector<reservation>& reservations, std::vector<int> 
 }
 
 void processReservation(unsigned short int currentNumberOfRooms, 
-    std::vector<reservation>& reservations, std::vector<int> rooms) {
-    using namespace std;
+    vector<reservation>& reservations, vector<int> rooms) {
 
     string userInput;
     int totalBill = 0;
@@ -279,7 +333,6 @@ void processReservation(unsigned short int currentNumberOfRooms,
 
 void showReservation(reservation reservationToShow)
 {
-    using namespace std;
 
     cout << "Reservation was found! " << endl;
     cout << "Name: " << reservationToShow.name << endl;
@@ -292,8 +345,7 @@ void showReservation(reservation reservationToShow)
     cout << endl;
 }
 
-void checkReservation(std::vector<reservation> reservations) {
-    using namespace std;
+void checkReservation(vector<reservation> reservations) {
 
     bool wasReservationFound;
     bool isSearchByNumberEnabled;
@@ -377,11 +429,14 @@ void checkReservation(std::vector<reservation> reservations) {
 
 int main()
 {
-    using namespace std;
+    filesystem::path folderPath = "C:\\temp";
+    filesystem::path filePath = "C:\\temp\\bookingList.txt";
 
     unsigned short int currentNumberOfRooms;
 
-    fstream inputBookingListFile("C:/Temp/bookingList.txt");
+    tryToCreateFolder(folderPath);
+
+    ifstream bookingListFileInput(filePath);
 
     //0 - free 1 - booked
     vector<int> rooms;
@@ -390,14 +445,22 @@ int main()
 
     string userInput;
 
-    if (myInputFile.is_open())
+    currentNumberOfRooms = generateNumberOfRooms();
+    
+    if (!bookingListFileInput.is_open())
     {
-        //fill reserwation list if it is not empty
+        ofstream bookingListFileOutput(filePath);
+
+        generateRandomBookedRooms(rooms, currentNumberOfRooms, bookingListFileOutput);  
+
+        bookingListFileOutput.close();
+
+        bookingListFileInput.open(filePath);
     }
 
-    currentNumberOfRooms = generateNumberOfRooms();
+    reservations = readInputFile(bookingListFileInput, rooms);
 
-    generateRandomBookedRooms(rooms, currentNumberOfRooms);
+    bookingListFileInput.close();
 
     greetTheUser(currentNumberOfRooms);
 
