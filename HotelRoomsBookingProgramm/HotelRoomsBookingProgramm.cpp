@@ -1,6 +1,8 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 struct reservation
 {
@@ -15,6 +17,22 @@ const unsigned int maxNumberOfRooms = 300;
 const unsigned int singleRoomPrice = 100;
 const unsigned int doubleRoomPrice = 150;
 
+void checkIsReservationsEmpty(fstream &bookingList)
+{
+    string bookingString;
+
+    getline(bookingList, bookingString);
+
+    if (bookingString != "")
+    {
+        //start processing file
+    }
+    else
+    {
+        //Fill file with random bookings
+    }
+}
+
 void greetTheUser(unsigned short int currentNumberOfRooms) {
     using namespace std;
     cout << "Welcome to hotel booking programm!" << endl;
@@ -23,7 +41,9 @@ void greetTheUser(unsigned short int currentNumberOfRooms) {
     cout << "First half of a rooms in out hotels are single rooms, second half are double rooms" << endl;
     cout << "Currently we have " << currentNumberOfRooms << " rooms" << endl;
     cout << "-------------------------------------------" << endl;
-    cout << "Press 1 to book a room or 2 to check your reservation, press 0 to exit " << endl;
+    cout << "Enter 1 to book a room" << endl;
+    cout << "Enter 2 to check your reservation" << endl;
+    cout << "Enter 0 to exit " << endl;
 }
 
 unsigned short int generateNumberOfRooms() {
@@ -275,7 +295,7 @@ void showReservation(reservation reservationToShow)
 void checkReservation(std::vector<reservation> reservations) {
     using namespace std;
 
-    bool wasReservationRound;
+    bool wasReservationFound;
     bool isSearchByNumberEnabled;
     bool isSearchByNameEnabled;
 
@@ -289,7 +309,7 @@ void checkReservation(std::vector<reservation> reservations) {
 
         isSearchByNumberEnabled = false;
         isSearchByNameEnabled = false;
-        wasReservationRound = false;
+        wasReservationFound = false;
 
         switch (getInputAsInt(userInput))
         {
@@ -326,7 +346,7 @@ void checkReservation(std::vector<reservation> reservations) {
                 {
                     showReservation(userReservation);
 
-                    wasReservationRound = true;
+                    wasReservationFound = true;
                 }
             }
 
@@ -336,12 +356,12 @@ void checkReservation(std::vector<reservation> reservations) {
                 {
                     showReservation(userReservation);
 
-                    wasReservationRound = true;
+                    wasReservationFound = true;
                 }
             }
         }
 
-        if (!wasReservationRound)
+        if (!wasReservationFound)
         {
             if (getInputAsInt(userInput) == 0)
             {
@@ -361,16 +381,19 @@ int main()
 
     unsigned short int currentNumberOfRooms;
 
+    fstream inputBookingListFile("C:/Temp/bookingList.txt");
+
     //0 - free 1 - booked
     vector<int> rooms;
-
-    vector<int> reservationNumbers;
-    vector<string> reservationNames;
-    vector<vector<int>> bookedRooms;
 
     vector<reservation> reservations;
 
     string userInput;
+
+    if (myInputFile.is_open())
+    {
+        //fill reserwation list if it is not empty
+    }
 
     currentNumberOfRooms = generateNumberOfRooms();
 
@@ -405,7 +428,9 @@ int main()
 
             //Tell all awailable inputs to user
             default:
-                cout << "Please enter 1, 2 or 0" << endl;
+                cout << "Enter 1 to book a room" << endl;
+                cout << "Enter 2 to check your reservation" << endl;
+                cout << "Enter 0 to exit " << endl;
         }
     }
 }
