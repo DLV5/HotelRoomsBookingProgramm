@@ -144,7 +144,7 @@ vector<reservation> readInputFile(ifstream& bookingFile, vector<int>& rooms)
 
 bool isRoomAwailable(unsigned short int roomNumber,
     vector<int> room) {
-    return room[roomNumber] == 0;
+    return room[roomNumber - 1] == 0;
 }
 
 int getInputAsInt(string& userInput) {
