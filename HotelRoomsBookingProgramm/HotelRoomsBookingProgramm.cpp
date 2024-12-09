@@ -258,6 +258,13 @@ void bookTheRoom(vector<int>& currentUserBookedRooms,
     userInput = getUserInput(currentNumberOfRooms);
     userInputAsNumber = getInputAsInt(userInput);
 
+    if (userInputAsNumber == 0)
+    {
+        cout << "Canceling registration" << endl;
+        cout << "Write another number: " << endl;
+        return;
+    }
+
     currentUserBookedRooms.push_back(roomToBook);
     unsigned short int pricePerNight = getPricePerNight(currentNumberOfRooms, userInputAsNumber);
 
@@ -272,26 +279,8 @@ void bookTheRoom(vector<int>& currentUserBookedRooms,
     cout << "Write 0 to finish reservation or number of another room, that you want to book ";
 }
 
-void finishReservation(vector<reservation>& reservations, vector<int> currentUserBookedRooms) {
-
-    cout << "For finishing reservation please write your name: " << endl;
-
-    string reservationName;
-    int reservaitonNumber;
-    reservation userReservation;
-
-    reservaitonNumber = getReservationNumber();
-    reservationName = getEntireStringAsUserInput();
-
-    userReservation.id = reservaitonNumber;
-    userReservation.name = reservationName;
-    userReservation.bookedRoomNumbers = currentUserBookedRooms;
-
-    reservations.push_back(userReservation);
-
-    cout << "Thank you for your reservation, " << reservationName << endl;
-    cout << "Your reservation number is: " << reservaitonNumber << endl;
-
+void saveReservationToFile(reservation userReservation)
+{
     ifstream bookingFileInput(filePath);
 
     std::vector<std::string> lines;
@@ -317,11 +306,34 @@ void finishReservation(vector<reservation>& reservations, vector<int> currentUse
             }
         }
 
-        if(!wasLineChanged)
+        if (!wasLineChanged)
             outputFile << modifiedLine << "\n";
 
         counter++;
     }
+}
+
+void finishReservation(vector<reservation>& reservations, vector<int> currentUserBookedRooms) {
+
+    cout << "For finishing reservation please write your name: " << endl;
+
+    string reservationName;
+    int reservaitonNumber;
+    reservation userReservation;
+
+    reservaitonNumber = getReservationNumber();
+    reservationName = getEntireStringAsUserInput();
+
+    userReservation.id = reservaitonNumber;
+    userReservation.name = reservationName;
+    userReservation.bookedRoomNumbers = currentUserBookedRooms;
+
+    reservations.push_back(userReservation);
+
+    cout << "Thank you for your reservation, " << reservationName << endl;
+    cout << "Your reservation number is: " << reservaitonNumber << endl;
+
+    saveReservationToFile(userReservation);
 }
 
 void processReservation(unsigned short int currentNumberOfRooms, 
@@ -342,11 +354,16 @@ void processReservation(unsigned short int currentNumberOfRooms,
         userInput = getUserInput(currentNumberOfRooms);
         int userInputAsNumber = getInputAsInt(userInput);
 
-        if (userInputAsNumber == 0) {
+        if (userInputAsNumber == 0 && !currentUserBookedRooms.empty()) {
             finishReservation(
                 reservations, 
                 currentUserBookedRooms 
             );
+            break;
+        }
+
+        if (userInputAsNumber == 0)
+        {
             break;
         }
 
