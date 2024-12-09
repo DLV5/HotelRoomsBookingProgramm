@@ -20,6 +20,9 @@ const unsigned int maxNumberOfRooms = 300;
 const unsigned int singleRoomPrice = 100;
 const unsigned int doubleRoomPrice = 150;
 
+const filesystem::path folderPath = "C:\\temp";
+const filesystem::path filePath = "C:\\temp\\bookingList.txt";
+
 const string namesForRandomBooking[] = { "Josh", "Mike", "Stuart", "Ben", "Lisa", "Bella"};
 
 void tryToCreateFolder(filesystem::path folderpath)
@@ -128,7 +131,11 @@ vector<reservation> readInputFile(ifstream& bookingFile, vector<int>& rooms)
                 userBookings.push_back(userBooking);
             }
             
-            rooms.push_back(counter);
+            rooms.push_back(1);
+        }
+        else
+        {
+            rooms.push_back(0);
         }
     }
 
@@ -284,6 +291,37 @@ void finishReservation(vector<reservation>& reservations, vector<int> currentUse
 
     cout << "Thank you for your reservation, " << reservationName << endl;
     cout << "Your reservation number is: " << reservaitonNumber << endl;
+
+    ifstream bookingFileInput(filePath);
+
+    std::vector<std::string> lines;
+    std::string line;
+    while (getline(bookingFileInput, line))
+    {
+        lines.push_back(line);
+    }
+    bookingFileInput.close();
+
+    ofstream outputFile(filePath);
+
+    int counter = 1;
+    for (const string& modifiedLine : lines)
+    {
+        bool wasLineChanged = false;
+        for (int room : userReservation.bookedRoomNumbers)
+        {
+            if (room == counter)
+            {
+                wasLineChanged = true;
+                outputFile << "1 " << userReservation.id << " - " << userReservation.name << "\n";
+            }
+        }
+
+        if(!wasLineChanged)
+            outputFile << modifiedLine << "\n";
+
+        counter++;
+    }
 }
 
 void processReservation(unsigned short int currentNumberOfRooms, 
@@ -429,9 +467,6 @@ void checkReservation(vector<reservation> reservations) {
 
 int main()
 {
-    filesystem::path folderPath = "C:\\temp";
-    filesystem::path filePath = "C:\\temp\\bookingList.txt";
-
     unsigned short int currentNumberOfRooms;
 
     tryToCreateFolder(folderPath);
